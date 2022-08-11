@@ -39,7 +39,7 @@ function processGateRealmRequest($action){
             break;
         case 'get_state':
             // TODO: Execute command to get gate state.
-            $result[$action_ix] = ['result'=>'TODO','realm'=>'gate','action'=>$action[$action_ix]];
+            $result[$action_ix] = ['result'=>'OK','realm'=>'gate','action'=>$action[$action_ix],'value'=>'open'];
             break;
         default:
             $result[$action_ix] = ['result'=>'NOK','realm'=>'gate','cause'=>'Action not recognized'];
@@ -65,7 +65,7 @@ function processGardenRealmRequest($action){
             break;
         case 'get_state':
             // TODO: Execute command to get garden lights state.
-            $result[$action_ix] = ['result'=>'TODO','realm'=>'garden','action'=>$action[$action_ix]];
+            $result[$action_ix] = ['result'=>'TODO','realm'=>'garden','action'=>$action[$action_ix],'value'=>'TODO'];
             break;
         default:
             $result[$action_ix] = ['result'=>'NOK','realm'=>'garden','cause'=>'Action not recognized'];
@@ -133,30 +133,15 @@ function processReqJson($req_json){
     $systemUsers = ['Gate', 'Garden', 'Pool'];
     $authorizedUsers = ['Dudu', 'Rafa', 'Júúúju', 'Carminha'];
 
-    $res_json = [];
-    $json_ix = 0;
-    while ($req_json[$json_ix] != null){
-        // Check if the request is valid.
-        if (($req_json->user == null) or ($req_json->realm == null) or ($req_json->action == null)){
-            $res_json = ['result'=>'NOK'];
-            $res_json += ['cause'=>'Bad request'];
-            echo json_encode($res_json);
-            exit();
-        }
-
-        // Get request data.
-        $user   = $req_json[$json_ix]->user;
-        $realm  = $req_json[$json_ix]->realm;
-        $action = $req_json[$json_ix]->action;
-
-        // Process request
-        $res_json += processRequest($authorizedUsers, $user, $realm, $action);
-
-        // Increment json indexer
-        $json_ix++;
+    // Check if the request is valid.
+    if (($req_json->user == null) or ($req_json->realm == null) or ($req_json->action == null)){
+        $res_json = ['result'=>'NOK'];
+        $res_json += ['cause'=>'Bad request'];
+        return $res_json;
     }
 
-    return $res_json;
+    // Process request
+    return processRequest($authorizedUsers, $req_json->user, $req_json->realm, $req_json->action);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -168,7 +153,7 @@ $req = file_get_contents('php://input');
 // Parse request data to JSON php object
 $req_json = json_decode($req);
 
-processReqJson($req_json);
+$res_json = processReqJson($req_json);
 
 // Send the response data
 //$array_to_string = implode(", ", $data);
