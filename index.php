@@ -1,62 +1,29 @@
 <?php
 
-// Authorized users declaration
-$systemUsers = ['Gate', 'Garden', 'Pool'];
-$authorizedUsers = ['Dudu', 'Rafa', 'Júúúju', 'Carminha'];
+////////////////////////////////////////////////////////////////
+//                      Global variables                      //
+////////////////////////////////////////////////////////////////
 
 date_default_timezone_set('Europe/Madrid');
 /* Echoclears the date
-     h : 12 hr format
-     H : 24 hr format
-     i : Minutes
-     s : Seconds
-     u : Microseconds
-     a : Lowercase am or pm
-     l : Full text for the day
-     F : Full text for the month
-     j : Day of the month
-     M : Month in letters
-     m : month in numbers
-     S : Sufix of the day st, nd, rd, etc
-     Y : 4 digit year
+    h : 12 hr format
+    H : 24 hr format
+    i : Minutes
+    s : Seconds
+    u : Microseconds
+    a : Lowercase am or pm
+    l : Full text for the day
+    F : Full text for the month
+    j : Day of the month
+    M : Month in letters
+    m : month in numbers
+    S : Sufix of the day st, nd, rd, etc
+    Y : 4 digit year
 */
 
-// Functions
-
-
-
-// Takes raw request data
-$req = file_get_contents('php://input');
-
-// Parse request data to JSON php object
-$req_json = json_decode($req)[0];
-
-//error_log("DUDU_ERROR: ".var_dump($req_json),0);
-//var_dump($req_json);
-
-//header('Content-type: text/javascript');
-
-/**
- * The request shall contain three pieces of data:
- * - user: String that identifies the user issuing the request.
- * - realm: String that determines the subject of the action.
- * - action: Action to be performed.
- * One request can have only one user and realm, but can carry many subject actions.
- */
-
-// Check if the request is valid.
-if (($req_json->user == null) or ($req_json->realm == null) or ($req_json->action == null)){
-    $res_json = ['result'=>'NOK'];
-    $res_json += ['cause'=>'Bad request'];
-    echo json_encode([$res_json]);
-    exit();
-}
-
-// Get request data.
-$user   = $req_json->user;
-$realm  = $req_json->realm;
-$action = $req_json->action;
-
+////////////////////////////////////////////////////////////////
+//                         Functions                          //
+////////////////////////////////////////////////////////////////
 function processGateRealmRequest($action){
     $action_ix = 0;
     $result = [];
@@ -154,10 +121,59 @@ function processRequest($authorizedUsers, $user, $realm, $action){
     }
 }
 
-$res_json = processRequest($authorizedUsers, $user, $realm, $action);
+function processReqJson($req_json){
+    /**
+     * The request shall contain three pieces of data:
+     * - user: String that identifies the user issuing the request.
+     * - realm: String that determines the subject of the action.
+     * - action: Action to be performed.
+     * One request can have only one user and realm, but can carry many subject actions.
+     */
+    // Users declaration
+    $systemUsers = ['Gate', 'Garden', 'Pool'];
+    $authorizedUsers = ['Dudu', 'Rafa', 'Júúúju', 'Carminha'];
+
+    $res_json = [];
+    $json_ix = 0;
+    while ($req_json[$json_ix] != null){
+        // Check if the request is valid.
+        if (($req_json->user == null) or ($req_json->realm == null) or ($req_json->action == null)){
+            $res_json = ['result'=>'NOK'];
+            $res_json += ['cause'=>'Bad request'];
+            echo json_encode($res_json);
+            exit();
+        }
+
+        // Get request data.
+        $user   = $req_json[$json_ix]->user;
+        $realm  = $req_json[$json_ix]->realm;
+        $action = $req_json[$json_ix]->action;
+
+        // Process request
+        $res_json += processRequest($authorizedUsers, $user, $realm, $action);
+
+        // Increment json indexer
+        $json_ix++;
+    }
+
+    return $res_json;
+}
+
+////////////////////////////////////////////////////////////////
+//                           Logic                            //
+////////////////////////////////////////////////////////////////
+// Take raw request data
+$req = file_get_contents('php://input');
+
+// Parse request data to JSON php object
+$req_json = json_decode($req);
+
+processReqJson($req_json);
 
 // Send the response data
 //$array_to_string = implode(", ", $data);
 //error_log("DUDU_ERROR: ".$array_to_string,0);
-echo json_encode([$res_json]);
+//error_log("DUDU_ERROR: ".var_dump($req_json),0);
+//var_dump($req_json);
+echo json_encode($res_json);
 ?>
