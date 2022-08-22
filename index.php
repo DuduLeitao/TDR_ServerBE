@@ -55,17 +55,17 @@ function processGardenRealmRequest($action){
     $result = [];
     while ($action[$action_ix]){
         switch($action[$action_ix]){
-        case 'lights_on':
+        case 'light_on':
             // TODO: Execute command to turn garden lights on.
             $result[$action_ix] = ['result'=>'OK','realm'=>'garden','action'=>$action[$action_ix]];
             break;
-        case 'lights_off':
+        case 'light_off':
             // TODO: Execute command to turn garden lights off.
             $result[$action_ix] = ['result'=>'OK','realm'=>'garden','action'=>$action[$action_ix]];
             break;
-        case 'get_state':
+        case 'light_getState':
             // TODO: Execute command to get garden lights state.
-            $result[$action_ix] = ['result'=>'TODO','realm'=>'garden','action'=>$action[$action_ix],'value'=>'TODO'];
+            $result[$action_ix] = ['result'=>'TODO','realm'=>'garden','action'=>$action[$action_ix],'value'=>'off'];
             break;
         default:
             $result[$action_ix] = ['result'=>'NOK','realm'=>'garden','cause'=>'Action not recognized'];
@@ -81,13 +81,17 @@ function processPoolRealmRequest($action){
     $result = [];
     while ($action[$action_ix]){
         switch($action[$action_ix]){
-        case 'action1':
-            // TODO: Execute command to action1.
-            $result[$action_ix] = ['result'=>'OK','realm'=>'pool','action'=>$action[$action_ix]];
+        case 'get_ph':
+            // TODO: Execute command to get pH level.
+            $result[$action_ix] = ['result'=>'OK','realm'=>'pool','action'=>$action[$action_ix],'value'=>'6.7'];
             break;
-        case 'action2':
-            // TODO: Execute command to action2..
-            $result[$action_ix] = ['result'=>'OK','realm'=>'pool','action'=>$action[$action_ix]];
+        case 'get_cl':
+            // TODO: Execute command to get chlorine level.
+            $result[$action_ix] = ['result'=>'OK','realm'=>'pool','action'=>$action[$action_ix],'value'=>'5'];
+            break;
+        case 'get_temp':
+            // TODO: Execute command to get temperature.
+            $result[$action_ix] = ['result'=>'OK','realm'=>'pool','action'=>$action[$action_ix],'value'=>'20'];
             break;
         default:
             $result[$action_ix] = ['result'=>'NOK','realm'=>'pool','cause'=>'Action not recognized'];
@@ -116,7 +120,7 @@ function processRequest($authorizedUsers, $user, $realm, $action){
         return processPoolRealmRequest($action);
         break;
     default:
-        return array('NOK'=>'Unrecognized realm');
+        return array('NOK'=>'Realm not recognized');
         break;
     }
 }
